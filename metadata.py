@@ -647,6 +647,16 @@ def dump(output, metadata):
             else:
                 output.write('%s: %s\n' % (key, value.encode('utf-8')))
 
+def get(key, metadata):
+    value = metadata[key]
+    if type(value) == list:
+		return ', '.join(value)
+    else:
+        if key in HUMAN and value in HUMAN[key]:
+            return HUMAN[key][value]
+        else:
+            return value.encode('utf-8')
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         metadata = {}

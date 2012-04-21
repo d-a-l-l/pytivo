@@ -6,6 +6,7 @@ import thread
 import time
 import urllib2
 import urlparse
+import re
 from urllib import quote, unquote
 from xml.dom import minidom
 from xml.sax.saxutils import escape
@@ -80,6 +81,8 @@ class ToGo(Plugin):
         shows_per_page = 50 # Change this to alter the number of shows returned
         folder = ''
         has_tivodecode = bool(config.get_bin('tivodecode'))
+        has_handbrake = bool(config.get_bin('HandBrakeCLI'))
+        has_atomicparsley = bool(config.get_bin('atomicparsley'))
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -179,6 +182,8 @@ class ToGo(Plugin):
         if tivoIP in queue:
             t.queue = queue[tivoIP]
         t.has_tivodecode = has_tivodecode
+        t.has_handbrake = has_handbrake
+        t.has_atomicparsley = has_atomicparsley
         t.tname = tivo_name
         t.tivoIP = tivoIP
         t.container = handler.cname
@@ -289,6 +294,18 @@ class ToGo(Plugin):
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name))
             del status[url]
+        fnre = re.compile('mpg$')
+        hfile = fnre.sub('mp4', outfile)
+        if status[url]['transcode']:
+            handbrake_path = config.get_bin('HandBrakeCLI')
+            hcmd = [handbrake_path, '-i', outfile, '-o', hfile, '--preset="iPad"']
+            handbrake = subprocess.Popen(hcmd)
+            os.remove(outfile)
+        if status[url]['metadata']:
+            atomicparsley_path = config.get_bin('AtomicParsley')
+            meta = basic_meta[url]
+            acmd = [atomicparsley_path, hfile, '--overWrite', '--TVShowName', metadata.get('seriesTitle', meta), '--description', metadata.get('description', meta), '--title', metadata.get('episodeTitle', meta), '--TVEpisodeNum', metadata.get('episodeNumber', meta), '--stik "TV Show"']
+            atomicparsley = subprocess.Popen(acmd)
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:
@@ -309,11 +326,14 @@ class ToGo(Plugin):
             tivo_mak = config.get_tsn('tivo_mak', tsn)
             urls = query.get('Url', [])
             decode = 'decode' in query
+            transcode = 'transcode' in query
+            metadata = 'metadata' in query
             save = 'save' in query
             for theurl in urls:
                 status[theurl] = {'running': False, 'error': '', 'rate': '',
                                   'queued': True, 'size': 0, 'finished': False,
-                                  'decode': decode, 'save': save}
+                                  'decode': decode, 'transcode': transcode,
+                                  'metadata': metadata, 'save': save}
                 if tivoIP in queue:
                     queue[tivoIP].append(theurl)
                 else:

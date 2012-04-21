@@ -125,6 +125,12 @@
 #if $has_tivodecode
  <input type="checkbox" name="decode">Decrypt with tivodecode<br>
 #end if
+#if $has_handbrake
+ <input type="checkbox" name="transcode">Transcode with Handbrake<br>
+#end if
+#if $has_atomicparsley
+ <input type="checkbox" name="metadata">Embed metadata with Atomic Parsley<br>
+#end if
  <input type="checkbox" name="save">Save metadata to .txt<br>
 </p>
 <p>
