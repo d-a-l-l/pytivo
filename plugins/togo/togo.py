@@ -296,16 +296,19 @@ class ToGo(Plugin):
             del status[url]
         fnre = re.compile('mpg$')
         hfile = fnre.sub('mp4', outfile)
+        logger.info('OUTFILE: %s, HFILE: %s' % (outfile, hfile))
         if status[url]['transcode']:
             handbrake_path = config.get_bin('HandBrakeCLI')
             hcmd = [handbrake_path, '-i', outfile, '-o', hfile, '--preset="iPad"']
-            handbrake = subprocess.Popen(hcmd)
+            logger.info('HCMD: %s' % (hcmd))
+            handbrake = subprocess.call(hcmd)
             os.remove(outfile)
         if status[url]['metadata']:
             atomicparsley_path = config.get_bin('AtomicParsley')
             meta = basic_meta[url]
             acmd = [atomicparsley_path, hfile, '--overWrite', '--TVShowName', metadata.get('seriesTitle', meta), '--description', metadata.get('description', meta), '--title', metadata.get('episodeTitle', meta), '--TVEpisodeNum', metadata.get('episodeNumber', meta), '--stik "TV Show"']
-            atomicparsley = subprocess.Popen(acmd)
+            logger.info('ACMD: %s' % (acmd))
+            atomicparsley = subprocess.call(acmd)
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:
