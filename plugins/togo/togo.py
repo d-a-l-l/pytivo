@@ -306,7 +306,7 @@ class ToGo(Plugin):
         if status[url]['metadata']:
             atomicparsley_path = config.get_bin('AtomicParsley')
             meta = basic_meta[url]
-            acmd = [atomicparsley_path, hfile, '--overWrite', '--TVShowName', metadata.get('seriesTitle', meta), '--description', metadata.get('description', meta), '--title', metadata.get('episodeTitle', meta), '--TVEpisodeNum', metadata.get('episodeNumber', meta), '--stik "TV Show"']
+            acmd = [atomicparsley_path, hfile, '--overWrite', '--TVShowName', metadata.get('seriesTitle', meta), '--description', metadata.get('description', meta), '--title', metadata.get('episodeTitle', meta), '--TVEpisodeNum', metadata.get('episodeNumber', meta), '--stik', 'TV Show']
             logger.info('ACMD: %s' % (acmd))
             atomicparsley = subprocess.call(acmd)
 
